@@ -23,7 +23,6 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: const Color(0xFFBC6B03),
       body: Center(
         child: Column(
@@ -123,6 +122,5 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
-  
   }
 }
