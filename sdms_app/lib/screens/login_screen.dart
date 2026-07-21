@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
 import '../core/app_text_styles.dart';
+import 'dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,8 +32,51 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() => _isLoading = false);
+
+    try {
+      final email = _emailController.text.trim();
+
+      await Supabase.instance.client.auth.signInWithPassword(
+        email: email,
+        password: _passwordController.text,
+      );
+
+      final profile = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('email', email)
+          .maybeSingle();
+
+      final role = profile?['role'] ?? 'student';
+      final fullName = profile?['full_name'] ?? email;
+      final studentId = profile?['student_id'] ?? '';
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => DashboardScreen(
+              role: role,
+              fullName: fullName,
+              studentId: studentId,
+            ),
+          ),
+        );
+      }
+    } on AuthException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Something went wrong. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   InputDecoration _inputDecoration(
@@ -82,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 16),
                   _header(),
                   const SizedBox(height: 24),
-                  Divider(color: AppColors.white.withOpacity(0.25)),
+                  Divider(color: AppColors.white.withValues(alpha: 0.25)),
                   const SizedBox(height: 20),
                   _roleSelector(),
                   const SizedBox(height: 16),
@@ -113,13 +158,13 @@ class _LoginScreenState extends State<LoginScreen> {
     decoration: BoxDecoration(
       color: AppColors.white,
       shape: BoxShape.circle,
-      border: Border.all(color: AppColors.white.withOpacity(0.5), width: 3),
+      border: Border.all(color: AppColors.white.withValues(alpha: 0.5), width: 3),
     ),
     child: ClipOval(
       child: Image.asset(
         'assets/logo-2.png',
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) =>
+        errorBuilder: (_, _, _) =>
             const Icon(Icons.school, size: 44, color: AppColors.primary),
       ),
     ),
@@ -152,12 +197,12 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: BoxDecoration(
               color: active
                   ? AppColors.white
-                  : AppColors.white.withOpacity(0.12),
+                  : AppColors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: active
                     ? AppColors.white
-                    : AppColors.white.withOpacity(0.22),
+                    : AppColors.white.withValues(alpha: 0.22),
               ),
             ),
             child: Text(
@@ -230,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: _isLoading ? null : _handleLogin,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.white,
-        disabledBackgroundColor: AppColors.white.withOpacity(0.6),
+        disabledBackgroundColor: AppColors.white.withValues(alpha: 0.6),
         padding: const EdgeInsets.symmetric(vertical: 15),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         elevation: 0,
