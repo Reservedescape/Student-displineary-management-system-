@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'report_incident_screen.dart';
 import '../core/app_colors.dart';
 import 'login_screen.dart';
 
@@ -72,7 +73,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           : Column(
                               children: _cases.map((c) => _caseCard(c)).toList(),
                             ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
+                  _reportIncidentButton(context),
+                  const SizedBox(height: 12),
                   _actionButtons(context, user?.email ?? 'Unknown'),
                 ],
               ),
@@ -204,6 +207,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ],
+    ),
+  );
+
+  // ── Report incident button ──────────────────────────────
+  Widget _reportIncidentButton(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: OutlinedButton.icon(
+      onPressed: () async {
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const ReportIncidentScreen()),
+        );
+        if (result == true) {
+          _loadCases();
+        }
+      },
+      icon: const Icon(Icons.report_outlined, size: 18, color: AppColors.navy),
+      label: const Text('Report an incident', style: TextStyle(color: AppColors.navy)),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: const BorderSide(color: AppColors.navy),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
     ),
   );
 
