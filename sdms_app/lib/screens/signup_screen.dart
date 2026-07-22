@@ -3,54 +3,61 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
 import '../core/app_text_styles.dart';
 import 'dashboard_screen.dart';
-import 'signup_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  // ── State ──────────────────────────────────────────────────────
+class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _studentIdController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _passwordVisible = false;
   bool _isLoading = false;
   int _selectedRole = 0;
 
   final _roles = ['Student', 'Staff', 'Admin'];
+  final _roleValues = ['student', 'staff', 'admin'];
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
+    _studentIdController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
+  Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
     try {
       final email = _emailController.text.trim();
+      final fullName = _fullNameController.text.trim();
+      final studentId = _studentIdController.text.trim();
+      final role = _roleValues[_selectedRole];
 
-      await Supabase.instance.client.auth.signInWithPassword(
+      final authResponse = await Supabase.instance.client.auth.signUp(
         email: email,
         password: _passwordController.text,
       );
 
-      final profile = await Supabase.instance.client
-          .from('profiles')
-          .select()
-          .eq('email', email)
-          .maybeSingle();
+      if (authResponse.user == null) {
+        throw Exception('Signup failed. Please try again.');
+      }
 
-      final role = profile?['role'] ?? 'student';
-      final fullName = profile?['full_name'] ?? email;
-      final studentId = profile?['student_id'] ?? '';
+      await Supabase.instance.client.from('profiles').insert({
+        'full_name': fullName,
+        'email': email,
+        'role': role,
+        'student_id': studentId,
+      });
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -70,12 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Something went wrong. Please try again.')),
-        );
-      }
-    } finally {
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Something went wrong. Please try again.')),
+    );
+  }
+} finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -123,29 +130,25 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 72),
-                  _logo(),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 56),
                   _header(),
-                  const SizedBox(height: 24),
-                  Divider(color: AppColors.white.withValues(alpha: 0.25)),
                   const SizedBox(height: 20),
+                  Divider(color: AppColors.white.withValues(alpha: 0.25)),
+                  const SizedBox(height: 16),
                   _roleSelector(),
-                  const SizedBox(height: 16),
-                  _emailField(),
                   const SizedBox(height: 14),
+                  _fullNameField(),
+                  const SizedBox(height: 12),
+                  _emailField(),
+                  const SizedBox(height: 12),
+                  _studentIdField(),
+                  const SizedBox(height: 12),
                   _passwordField(),
-                  _forgotPassword(),
-                  const SizedBox(height: 8),
-                  _loginButton(),
+                  const SizedBox(height: 20),
+                  _signupButton(),
                   const SizedBox(height: 16),
-                  _signUpLink(context),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'UEAB  ·  Secure login',
-                    style: AppTextStyles.footerText,
-                  ),
-                  const SizedBox(height: 40),
+                  _backToLogin(context),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -155,24 +158,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _logo() => Container(
-    width: 90,
-    height: 90,
-    decoration: BoxDecoration(
-      color: AppColors.white,
-      shape: BoxShape.circle,
-      border: Border.all(color: AppColors.white.withValues(alpha: 0.5), width: 3),
-    ),
-    child: ClipOval(
-      child: Image.asset(
-        'assets/logo-2.png',
-        fit: BoxFit.contain,
-        errorBuilder: (_, _, _) =>
-            const Icon(Icons.school, size: 44, color: AppColors.primary),
-      ),
-    ),
-  );
-
   Widget _header() => const Column(
     children: [
       Text(
@@ -181,9 +166,9 @@ class _LoginScreenState extends State<LoginScreen> {
         style: AppTextStyles.universityName,
       ),
       SizedBox(height: 4),
-      Text('SDMS', style: AppTextStyles.appTitle),
+      Text('Create account', style: AppTextStyles.appTitle),
       SizedBox(height: 4),
-      Text('Student Disciplinary System', style: AppTextStyles.subtitle),
+      Text('Register for SDMS', style: AppTextStyles.subtitle),
     ],
   );
 
@@ -223,6 +208,17 @@ class _LoginScreenState extends State<LoginScreen> {
     }),
   );
 
+  Widget _fullNameField() => TextFormField(
+    controller: _fullNameController,
+    textInputAction: TextInputAction.next,
+    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
+    decoration: _inputDecoration('Full name', Icons.person_outline),
+    validator: (v) {
+      if (v == null || v.trim().isEmpty) return 'Please enter your full name';
+      return null;
+    },
+  );
+
   Widget _emailField() => TextFormField(
     controller: _emailController,
     keyboardType: TextInputType.emailAddress,
@@ -236,11 +232,22 @@ class _LoginScreenState extends State<LoginScreen> {
     },
   );
 
+  Widget _studentIdField() => TextFormField(
+    controller: _studentIdController,
+    textInputAction: TextInputAction.next,
+    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
+    decoration: _inputDecoration('Student / Staff ID', Icons.badge_outlined),
+    validator: (v) {
+      if (v == null || v.trim().isEmpty) return 'Please enter your ID';
+      return null;
+    },
+  );
+
   Widget _passwordField() => TextFormField(
     controller: _passwordController,
     obscureText: !_passwordVisible,
     textInputAction: TextInputAction.done,
-    onFieldSubmitted: (_) => _handleLogin(),
+    onFieldSubmitted: (_) => _handleSignup(),
     style: const TextStyle(color: AppColors.inputText, fontSize: 14),
     decoration: _inputDecoration(
       'Password',
@@ -255,27 +262,16 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     ),
     validator: (v) {
-      if (v == null || v.isEmpty) return 'Please enter your password';
+      if (v == null || v.isEmpty) return 'Please enter a password';
       if (v.length < 6) return 'Password must be at least 6 characters';
       return null;
     },
   );
 
-  Widget _forgotPassword() => Align(
-    alignment: Alignment.centerRight,
-    child: TextButton(
-      onPressed: () {},
-      child: const Text(
-        'Forgot password?',
-        style: AppTextStyles.forgotPassword,
-      ),
-    ),
-  );
-
-  Widget _loginButton() => SizedBox(
+  Widget _signupButton() => SizedBox(
     width: double.infinity,
     child: ElevatedButton(
-      onPressed: _isLoading ? null : _handleLogin,
+      onPressed: _isLoading ? null : _handleSignup,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.white,
         disabledBackgroundColor: AppColors.white.withValues(alpha: 0.6),
@@ -292,31 +288,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: AppColors.primary,
               ),
             )
-          : const Text('Sign in', style: AppTextStyles.buttonLabel),
+          : const Text('Create account', style: AppTextStyles.buttonLabel),
     ),
   );
 
-  Widget _signUpLink(BuildContext context) => TextButton(
-    onPressed: () {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const SignupScreen()),
-      );
-    },
-    child: RichText(
-      text: TextSpan(
-        style: AppTextStyles.forgotPassword,
-        children: [
-          const TextSpan(text: "Don't have an account? "),
-          TextSpan(
-            text: 'Sign up',
-            style: TextStyle(
-              color: AppColors.white,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ],
-      ),
+  Widget _backToLogin(BuildContext context) => TextButton(
+    onPressed: () => Navigator.of(context).pop(),
+    child: const Text(
+      'Already have an account? Sign in',
+      style: AppTextStyles.forgotPassword,
     ),
   );
 }
