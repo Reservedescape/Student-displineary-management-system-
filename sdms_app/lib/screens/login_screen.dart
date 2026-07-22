@@ -1,4 +1,5 @@
 import 'staff_dashboard_screen.dart';
+import 'admin_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
@@ -56,13 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
   Navigator.of(context).pushReplacement(
     MaterialPageRoute(
-      builder: (context) => role == 'staff'
-          ? StaffDashboardScreen(fullName: fullName)
-          : DashboardScreen(
-              role: role,
-              fullName: fullName,
-              studentId: studentId,
-            ),
+      builder: (context) {
+        if (role == 'staff') return StaffDashboardScreen(fullName: fullName);
+        if (role == 'admin') return AdminDashboardScreen(fullName: fullName);
+        return DashboardScreen(role: role, fullName: fullName, studentId: studentId);
+      },
     ),
   );
 }
