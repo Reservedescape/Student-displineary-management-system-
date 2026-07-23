@@ -19,7 +19,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   bool _loading = true;
   List<Map<String, dynamic>> _cases = [];
   List<Map<String, dynamic>> _incidents = [];
-  Set<int> _processingIds = {};
+  final Set<int> _processingIds = {};
 
   @override
   void initState() {
@@ -260,7 +260,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.report_outlined, color: AppColors.primary, size: 18),
+              const Icon(Icons.report_problem_outlined, color: AppColors.primary, size: 18),
               const SizedBox(width: 8),
               Text(
                 'Incident #$incidentId',
@@ -317,7 +317,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.description_outlined, color: AppColors.navy, size: 20),
+            const Icon(Icons.gavel, color: AppColors.navy, size: 20),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

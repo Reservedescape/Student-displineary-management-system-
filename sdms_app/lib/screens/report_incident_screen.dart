@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
-import '../core/app_text_styles.dart';
 
 class ReportIncidentScreen extends StatefulWidget {
   const ReportIncidentScreen({super.key});
@@ -14,6 +13,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
   final _formKey = GlobalKey<FormState>();
   final _descriptionController = TextEditingController();
   bool _isLoading = false;
+  bool _isAnonymous = false;
 
   @override
   void dispose() {
@@ -27,11 +27,13 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
 
     try {
       final user = Supabase.instance.client.auth.currentUser;
+      final reportedBy = _isAnonymous ? 'Anonymous' : (user?.email ?? 'unknown');
 
       await Supabase.instance.client.from('incidents').insert({
-        'reported_by': user?.email ?? 'unknown',
-        'description': _descriptionController.text.trim(),
-      });
+  'reported_by': reportedBy,
+  'description': _descriptionController.text.trim(),
+  'is_anonymous': _isAnonymous,
+});
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,6 +105,29 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   if (v.trim().length < 10) return 'Please provide more detail';
                   return null;
                 },
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: CheckboxListTile(
+                  value: _isAnonymous,
+                  onChanged: (v) => setState(() => _isAnonymous = v ?? false),
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  activeColor: AppColors.navy,
+                  title: const Text(
+                    'Report anonymously',
+                    style: TextStyle(fontSize: 14, color: AppColors.inputText),
+                  ),
+                  subtitle: const Text(
+                    'Your name will not be shown to staff reviewing this report.',
+                    style: TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(

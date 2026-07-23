@@ -215,7 +215,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.report_outlined, color: AppColors.primary, size: 18),
+            const Icon(Icons.report_problem_outlined, color: AppColors.primary, size: 18),
             const SizedBox(width: 8),
             Text(
               'Incident #${incident['id']}',
@@ -251,7 +251,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.description_outlined, color: AppColors.navy, size: 20),
+            const Icon(Icons.gavel, color: AppColors.navy, size: 20),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

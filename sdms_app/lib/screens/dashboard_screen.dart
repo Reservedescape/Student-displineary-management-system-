@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'report_incident_screen.dart';
+import '../core/formatters.dart';
 import '../core/app_colors.dart';
 import 'login_screen.dart';
 
@@ -191,17 +192,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.description_outlined, color: AppColors.navy, size: 20),
+            const Icon(Icons.gavel, color: AppColors.navy, size: 20),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Case #${caseData['id']}', style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 2),
-                Text(
-                  'Assigned to: ${caseData['assigned_to'] ?? 'Unassigned'}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
+const SizedBox(height: 2),
+Text(
+  'Assigned to: ${caseData['assigned_to'] ?? 'Unassigned'}',
+  style: const TextStyle(fontSize: 12, color: Colors.grey),
+),
+Text(
+  formatDate(caseData['created_at']),
+  style: const TextStyle(fontSize: 11, color: Colors.grey),
+),
               ],
             ),
           ],
