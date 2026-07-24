@@ -19,6 +19,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool _loading = true;
   List<Map<String, dynamic>> _cases = [];
   List<Map<String, dynamic>> _incidents = [];
+  List<Map<String, dynamic>> _staffList = [];
+  final Map<int, String?> _selectedStaff = {};
+  final Set<int> _processingIds = {};
 
   @override
   void initState() {
@@ -39,13 +42,69 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           .select()
           .order('created_at', ascending: false);
 
+      final staffResult = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('role', 'staff');
+
       setState(() {
         _cases = List<Map<String, dynamic>>.from(casesResult);
         _incidents = List<Map<String, dynamic>>.from(incidentsResult);
+        _staffList = List<Map<String, dynamic>>.from(staffResult);
         _loading = false;
       });
     } catch (e) {
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _assignCaseToStaff(Map<String, dynamic> incident) async {
+    final incidentId = incident['id'] as int;
+    final assignedStaff = _selectedStaff[incidentId];
+
+    if (assignedStaff == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a staff member first.')),
+      );
+      return;
+    }
+
+    setState(() => _processingIds.add(incidentId));
+
+    try {
+      final reporterEmail = incident['reported_by'];
+
+      String studentId = '';
+      if (reporterEmail != 'Anonymous') {
+        final profile = await Supabase.instance.client
+            .from('profiles')
+            .select()
+            .eq('email', reporterEmail)
+            .maybeSingle();
+        studentId = profile?['student_id'] ?? '';
+      }
+
+      await Supabase.instance.client.from('cases').insert({
+        'incident_id': incidentId,
+        'student_id': studentId,
+        'assigned_to': assignedStaff,
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Case assigned to $assignedStaff.')),
+        );
+      }
+
+      await _loadData();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not assign case. Please try again.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _processingIds.remove(incidentId));
     }
   }
 
@@ -201,41 +260,89 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     ),
   );
 
-  // ── Incident card (read-only for admin) ─────────────────
-  Widget _incidentCard(Map<String, dynamic> incident) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: const Color(0xFFFAEEDA),
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: const Color(0xFFE0C9A0)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.report_problem_outlined, color: AppColors.primary, size: 18),
-            const SizedBox(width: 8),
-            Text(
-              'Incident #${incident['id']}',
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.inputText),
+  // ── Incident card (with staff assignment) ────────────────
+  Widget _incidentCard(Map<String, dynamic> incident) {
+    final incidentId = incident['id'] as int;
+    final isProcessing = _processingIds.contains(incidentId);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAEEDA),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0C9A0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.report_problem_outlined, color: AppColors.primary, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                'Incident #$incidentId',
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.inputText),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            incident['description'] ?? '',
+            style: const TextStyle(fontSize: 13, color: AppColors.inputText),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Reported by: ${incident['reported_by'] ?? 'Unknown'}',
+            style: const TextStyle(fontSize: 11, color: Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE0C9A0)),
             ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        Text(
-          incident['description'] ?? '',
-          style: const TextStyle(fontSize: 13, color: AppColors.inputText),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Reported by: ${incident['reported_by'] ?? 'Unknown'}',
-          style: const TextStyle(fontSize: 11, color: Colors.grey),
-        ),
-      ],
-    ),
-  );
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                hint: const Text('Assign to staff member', style: TextStyle(fontSize: 13)),
+                value: _selectedStaff[incidentId],
+                items: _staffList.map((staff) {
+                  final name = staff['full_name'] as String;
+                  return DropdownMenuItem(value: name, child: Text(name, style: const TextStyle(fontSize: 13)));
+                }).toList(),
+                onChanged: (value) {
+                  setState(() => _selectedStaff[incidentId] = value);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isProcessing ? null : () => _assignCaseToStaff(incident),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.navy,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                elevation: 0,
+              ),
+              child: isProcessing
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
+                    )
+                  : const Text('Create & assign case', style: TextStyle(color: AppColors.white, fontSize: 13)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   // ── Case card ──────────────────────────────────────────
   Widget _caseCard(Map<String, dynamic> caseData) => Container(

@@ -18,8 +18,6 @@ class StaffDashboardScreen extends StatefulWidget {
 class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   bool _loading = true;
   List<Map<String, dynamic>> _cases = [];
-  List<Map<String, dynamic>> _incidents = [];
-  final Set<int> _processingIds = {};
 
   @override
   void initState() {
@@ -35,64 +33,13 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           .select()
           .eq('assigned_to', widget.fullName);
 
-      final incidentsResult = await Supabase.instance.client
-          .from('incidents')
-          .select()
-          .order('created_at', ascending: false);
-
       setState(() {
         _cases = List<Map<String, dynamic>>.from(casesResult);
-        _incidents = List<Map<String, dynamic>>.from(incidentsResult);
         _loading = false;
       });
     } catch (e) {
       setState(() => _loading = false);
     }
-  }
-
-  Future<void> _createCaseFromIncident(Map<String, dynamic> incident) async {
-    final incidentId = incident['id'] as int;
-    setState(() => _processingIds.add(incidentId));
-
-    try {
-      final reporterEmail = incident['reported_by'];
-
-      final profile = await Supabase.instance.client
-          .from('profiles')
-          .select()
-          .eq('email', reporterEmail)
-          .maybeSingle();
-
-      final studentId = profile?['student_id'] ?? '';
-
-      await Supabase.instance.client.from('cases').insert({
-        'incident_id': incidentId,
-        'student_id': studentId,
-        'assigned_to': widget.fullName,
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Case created successfully.')),
-        );
-      }
-
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not create case. Please try again.')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _processingIds.remove(incidentId));
-    }
-  }
-
-  // Incidents that already have a matching case are excluded from the list
-  List<Map<String, dynamic>> get _openIncidents {
-    final caseIncidentIds = _cases.map((c) => c['incident_id']).toSet();
-    return _incidents.where((i) => !caseIncidentIds.contains(i['id'])).toList();
   }
 
   @override
@@ -111,28 +58,12 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(child: _statCard('Assigned cases', '${_cases.length}')),
-                      const SizedBox(width: 12),
-                      Expanded(child: _statCard('Open incidents', '${_openIncidents.length}')),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _sectionTitle('Open incidents'),
-                  const SizedBox(height: 10),
-                  _loading
-                      ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                      : _openIncidents.isEmpty
-                          ? _emptyState('No open incidents right now.')
-                          : Column(
-                              children: _openIncidents.map((i) => _incidentCard(i)).toList(),
-                            ),
+                  _statCard('Assigned cases', '${_cases.length}'),
                   const SizedBox(height: 20),
                   _sectionTitle('Cases assigned to you'),
                   const SizedBox(height: 10),
                   _loading
-                      ? const SizedBox()
+                      ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                       : _cases.isEmpty
                           ? _emptyState('No cases currently assigned to you.')
                           : Column(
@@ -241,67 +172,6 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       textAlign: TextAlign.center,
     ),
   );
-
-  // ── Incident card ────────────────────────────────────────
-  Widget _incidentCard(Map<String, dynamic> incident) {
-    final incidentId = incident['id'] as int;
-    final isProcessing = _processingIds.contains(incidentId);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFAEEDA),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE0C9A0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.report_problem_outlined, color: AppColors.primary, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                'Incident #$incidentId',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.inputText),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            incident['description'] ?? '',
-            style: const TextStyle(fontSize: 13, color: AppColors.inputText),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Reported by: ${incident['reported_by'] ?? 'Unknown'}',
-            style: const TextStyle(fontSize: 11, color: Colors.grey),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: isProcessing ? null : () => _createCaseFromIncident(incident),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.navy,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                elevation: 0,
-              ),
-              child: isProcessing
-                  ? const SizedBox(
-                      height: 16,
-                      width: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
-                    )
-                  : const Text('Create case', style: TextStyle(color: AppColors.white, fontSize: 13)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── Case card ──────────────────────────────────────────
   Widget _caseCard(Map<String, dynamic> caseData) => Container(
