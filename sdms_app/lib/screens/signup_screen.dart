@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
 import '../core/app_text_styles.dart';
-import 'dashboard_screen.dart';
+import '../core/constants.dart';
+import '../services/auth_service.dart';
+import 'student/student_dashboard_screen.dart';
+import 'staff/staff_dashboard_screen.dart';
+import 'admin/admin_dashboard_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -17,12 +20,11 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _studentIdController = TextEditingController();
   final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+
   bool _passwordVisible = false;
   bool _isLoading = false;
-  int _selectedRole = 0;
-
-  final _roles = ['Student', 'Staff', 'Admin'];
-  final _roleValues = ['student', 'staff', 'admin'];
+  UserRole _selectedRole = UserRole.student;
 
   @override
   void dispose() {
@@ -39,117 +41,83 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final email = _emailController.text.trim();
+      final password = _passwordController.text;
       final fullName = _fullNameController.text.trim();
       final studentId = _studentIdController.text.trim();
-      final role = _roleValues[_selectedRole];
 
-      final authResponse = await Supabase.instance.client.auth.signUp(
+      final profile = await _authService.signup(
         email: email,
-        password: _passwordController.text,
+        password: password,
+        fullName: fullName,
+        studentId: studentId,
+        role: _selectedRole,
       );
 
-      if (authResponse.user == null) {
-        throw Exception('Signup failed. Please try again.');
-      }
+      if (!mounted) return;
 
-      await Supabase.instance.client.from('profiles').insert({
-        'full_name': fullName,
-        'email': email,
-        'role': role,
-        'student_id': studentId,
-      });
+      if (profile != null) {
+        Widget targetDashboard;
+        switch (profile.role) {
+          case UserRole.staff:
+            targetDashboard = StaffDashboardScreen(userProfile: profile);
+            break;
+          case UserRole.admin:
+            targetDashboard = AdminDashboardScreen(userProfile: profile);
+            break;
+          case UserRole.student:
+          default:
+            targetDashboard = StudentDashboardScreen(userProfile: profile);
+            break;
+        }
 
-      if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => DashboardScreen(
-              role: role,
-              fullName: fullName,
-              studentId: studentId,
-            ),
-          ),
-        );
-      }
-    } on AuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
+          MaterialPageRoute(builder: (_) => targetDashboard),
         );
       }
     } catch (e) {
-  if (mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Something went wrong. Please try again.')),
-    );
-  }
-} finally {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  InputDecoration _inputDecoration(
-    String hint,
-    IconData icon, {
-    Widget? suffix,
-  }) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: AppColors.hintText, fontSize: 13),
-      filled: true,
-      fillColor: AppColors.white,
-      prefixIcon: Icon(icon, color: AppColors.iconColor, size: 20),
-      suffixIcon: suffix,
-      contentPadding: const EdgeInsets.symmetric(vertical: 14),
-      border: _border(Colors.transparent),
-      focusedBorder: _border(AppColors.navy),
-      errorBorder: _border(Colors.redAccent),
-      focusedErrorBorder: _border(Colors.redAccent),
-    );
-  }
-
-  OutlineInputBorder _border(Color color) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10),
-    borderSide: color == Colors.transparent
-        ? BorderSide.none
-        : BorderSide(color: color, width: 1.5),
-  );
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
-      body: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: MediaQuery.of(context).size.height,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 56),
-                  _header(),
-                  const SizedBox(height: 20),
-                  Divider(color: AppColors.white.withValues(alpha: 0.25)),
-                  const SizedBox(height: 16),
-                  _roleSelector(),
-                  const SizedBox(height: 14),
-                  _fullNameField(),
-                  const SizedBox(height: 12),
-                  _emailField(),
-                  const SizedBox(height: 12),
-                  _studentIdField(),
-                  const SizedBox(height: 12),
-                  _passwordField(),
-                  const SizedBox(height: 20),
-                  _signupButton(),
-                  const SizedBox(height: 16),
-                  _backToLogin(context),
-                  const SizedBox(height: 32),
-                ],
+      backgroundColor: AppColors.navy,
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.heroGradient),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 440),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _buildHeader(),
+                      const SizedBox(height: 24),
+                      _buildSignupCard(),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: const Text(
+                          'Already registered? Back to Sign In',
+                          style: AppTextStyles.forgotPassword,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -158,145 +126,163 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Widget _header() => const Column(
-    children: [
-      Text(
-        'University of Eastern Africa, Baraton',
-        textAlign: TextAlign.center,
-        style: AppTextStyles.universityName,
-      ),
-      SizedBox(height: 4),
-      Text('Create account', style: AppTextStyles.appTitle),
-      SizedBox(height: 4),
-      Text('Register for SDMS', style: AppTextStyles.subtitle),
-    ],
-  );
-
-  Widget _roleSelector() => Row(
-    children: List.generate(_roles.length, (i) {
-      final active = _selectedRole == i;
-      return Expanded(
-        child: GestureDetector(
-          onTap: () => setState(() => _selectedRole = i),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(vertical: 9),
-            decoration: BoxDecoration(
-              color: active
-                  ? AppColors.white
-                  : AppColors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: active
-                    ? AppColors.white
-                    : AppColors.white.withValues(alpha: 0.22),
-              ),
-            ),
-            child: Text(
-              _roles[i],
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: active ? FontWeight.bold : FontWeight.normal,
-                color: active ? AppColors.primary : AppColors.white70,
-              ),
-            ),
+  Widget _buildHeader() => const Column(
+        children: [
+          Text(
+            'UNIVERSITY OF EASTERN AFRICA, BARATON',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.universityName,
           ),
+          SizedBox(height: 4),
+          Text('Create Account', style: AppTextStyles.appTitle),
+          SizedBox(height: 4),
+          Text('Join the SDMS Portal', style: AppTextStyles.subtitle),
+        ],
+      );
+
+  Widget _buildSignupCard() => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select Account Type',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: UserRole.values.map((role) {
+                final active = _selectedRole == role;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedRole = role),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 3),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: active ? AppColors.navy : AppColors.background,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: active ? AppColors.navy : AppColors.cardBorder,
+                        ),
+                      ),
+                      child: Text(
+                        role.label.split(' ').first,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: active ? FontWeight.bold : FontWeight.normal,
+                          color: active ? AppColors.white : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _fullNameController,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                hintText: 'e.g. John Doe',
+                prefixIcon: Icon(Icons.person_outline, color: AppColors.primary),
+              ),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Please enter full name' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'University Email',
+                hintText: 'student@ueab.ac.ke',
+                prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Please enter email';
+                if (!v.contains('@')) return 'Enter valid email';
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _studentIdController,
+              textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                labelText: _selectedRole == UserRole.student ? 'Student ID' : 'Staff ID',
+                hintText: 'e.g. S21/04561/19',
+                prefixIcon: const Icon(Icons.badge_outlined, color: AppColors.primary),
+              ),
+              validator: (v) => v == null || v.trim().isEmpty ? 'Please enter ID' : null,
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: !_passwordVisible,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _handleSignup(),
+              decoration: InputDecoration(
+                labelText: 'Password',
+                hintText: '••••••••',
+                prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: AppColors.textMuted,
+                  ),
+                  onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
+                ),
+              ),
+              validator: (v) => v == null || v.length < 6 ? 'Min 6 characters' : null,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _isLoading ? null : _handleSignup,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: AppColors.white,
+                        ),
+                      )
+                    : const Text(
+                        'CREATE ACCOUNT',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+              ),
+            ),
+          ],
         ),
       );
-    }),
-  );
-
-  Widget _fullNameField() => TextFormField(
-    controller: _fullNameController,
-    textInputAction: TextInputAction.next,
-    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
-    decoration: _inputDecoration('Full name', Icons.person_outline),
-    validator: (v) {
-      if (v == null || v.trim().isEmpty) return 'Please enter your full name';
-      return null;
-    },
-  );
-
-  Widget _emailField() => TextFormField(
-    controller: _emailController,
-    keyboardType: TextInputType.emailAddress,
-    textInputAction: TextInputAction.next,
-    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
-    decoration: _inputDecoration('University email', Icons.mail_outline),
-    validator: (v) {
-      if (v == null || v.trim().isEmpty) return 'Please enter your email';
-      if (!v.contains('@')) return 'Enter a valid email';
-      return null;
-    },
-  );
-
-  Widget _studentIdField() => TextFormField(
-    controller: _studentIdController,
-    textInputAction: TextInputAction.next,
-    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
-    decoration: _inputDecoration('Student / Staff ID', Icons.badge_outlined),
-    validator: (v) {
-      if (v == null || v.trim().isEmpty) return 'Please enter your ID';
-      return null;
-    },
-  );
-
-  Widget _passwordField() => TextFormField(
-    controller: _passwordController,
-    obscureText: !_passwordVisible,
-    textInputAction: TextInputAction.done,
-    onFieldSubmitted: (_) => _handleSignup(),
-    style: const TextStyle(color: AppColors.inputText, fontSize: 14),
-    decoration: _inputDecoration(
-      'Password',
-      Icons.lock_outline,
-      suffix: IconButton(
-        icon: Icon(
-          _passwordVisible ? Icons.visibility : Icons.visibility_off,
-          color: AppColors.hintText,
-          size: 20,
-        ),
-        onPressed: () => setState(() => _passwordVisible = !_passwordVisible),
-      ),
-    ),
-    validator: (v) {
-      if (v == null || v.isEmpty) return 'Please enter a password';
-      if (v.length < 6) return 'Password must be at least 6 characters';
-      return null;
-    },
-  );
-
-  Widget _signupButton() => SizedBox(
-    width: double.infinity,
-    child: ElevatedButton(
-      onPressed: _isLoading ? null : _handleSignup,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.white,
-        disabledBackgroundColor: AppColors.white.withValues(alpha: 0.6),
-        padding: const EdgeInsets.symmetric(vertical: 15),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        elevation: 0,
-      ),
-      child: _isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-                color: AppColors.primary,
-              ),
-            )
-          : const Text('Create account', style: AppTextStyles.buttonLabel),
-    ),
-  );
-
-  Widget _backToLogin(BuildContext context) => TextButton(
-    onPressed: () => Navigator.of(context).pop(),
-    child: const Text(
-      'Already have an account? Sign in',
-      style: AppTextStyles.forgotPassword,
-    ),
-  );
 }

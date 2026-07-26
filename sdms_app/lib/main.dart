@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/app_theme.dart';
+import 'screens/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,17 +11,19 @@ void main() async {
     publishableKey: 'sb_publishable_i16wlV3cZPlpLxZjKhfpyg_PXcnvzo8',
   );
 
-  runApp(const MyApp());
+  runApp(const SDMSApp());
 }
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+
+class SDMSApp extends StatelessWidget {
+  const SDMSApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SDMS',
+      title: 'UEAB SDMS',
       debugShowCheckedModeBanner: false,
-      home:  LoginScreen(),
+      theme: AppTheme.lightTheme,
+      home: const LoginScreen(),
     );
   }
 }
