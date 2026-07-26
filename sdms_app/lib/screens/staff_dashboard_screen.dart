@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
 import 'login_screen.dart';
+import 'case_detail_screen.dart';
 
 class StaffDashboardScreen extends StatefulWidget {
   final String fullName;
@@ -173,36 +174,45 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     ),
   );
 
-  // ── Case card ──────────────────────────────────────────
-  Widget _caseCard(Map<String, dynamic> caseData) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: const Color(0xFFE0E0E0)),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.gavel, color: AppColors.navy, size: 20),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Case #${caseData['id']}', style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 2),
-                Text(
-                  'Student ID: ${caseData['student_id'] ?? 'Unknown'}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
+  // ── Case card (tappable) ─────────────────────────────────
+  Widget _caseCard(Map<String, dynamic> caseData) => GestureDetector(
+    onTap: () async {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => CaseDetailScreen(caseData: caseData)),
+      );
+      _loadData();
+    },
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.gavel, color: AppColors.navy, size: 20),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Case #${caseData['id']}', style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Student ID: ${caseData['student_id'] ?? 'Unknown'}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Icon(Icons.chevron_right, color: Colors.grey, size: 20),
+        ],
+      ),
     ),
   );
 

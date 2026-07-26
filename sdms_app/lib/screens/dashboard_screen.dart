@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'report_incident_screen.dart';
+import 'appeal_screen.dart';
 import '../core/formatters.dart';
 import '../core/app_colors.dart';
 import 'login_screen.dart';
@@ -35,7 +36,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       final result = await Supabase.instance.client
           .from('cases')
-          .select()
+          .select('*, sanctions(*), appeals(*)')
           .eq('student_id', widget.studentId);
 
       setState(() {
@@ -43,6 +44,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _loading = false;
       });
     } catch (e) {
+      print('ERROR loading cases: $e'); 
       setState(() => _loading = false);
     }
   }
@@ -179,41 +181,101 @@ class _DashboardScreenState extends State<DashboardScreen> {
   );
 
   // ── Case card ──────────────────────────────────────────
-  Widget _caseCard(Map<String, dynamic> caseData) => Container(
-    margin: const EdgeInsets.only(bottom: 8),
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF5F5F5),
-      borderRadius: BorderRadius.circular(10),
-      border: Border.all(color: const Color(0xFFE0E0E0)),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.gavel, color: AppColors.navy, size: 20),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Case #${caseData['id']}', style: const TextStyle(fontSize: 14)),
-const SizedBox(height: 2),
-Text(
-  'Assigned to: ${caseData['assigned_to'] ?? 'Unassigned'}',
-  style: const TextStyle(fontSize: 12, color: Colors.grey),
-),
-Text(
-  formatDate(caseData['created_at']),
-  style: const TextStyle(fontSize: 11, color: Colors.grey),
-),
-              ],
-            ),
+  Widget _caseCard(Map<String, dynamic> caseData) {
+    final sanctions = caseData['sanctions'] as List? ?? [];
+    final appeals = caseData['appeals'] as List? ?? [];
+    final hasSanction = sanctions.isNotEmpty;
+    final existingAppeal = appeals.isNotEmpty
+        ? appeals.first as Map<String, dynamic>
+        : null;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.gavel, color: AppColors.navy, size: 20),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Case #${caseData['id']}', style: const TextStyle(fontSize: 14)),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Assigned to: ${caseData['assigned_to'] ?? 'Unassigned'}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                  Text(
+                    formatDate(caseData['created_at']),
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          if (hasSanction) ...[
+            const SizedBox(height: 10),
+            _appealSection(caseData['id'] as int, existingAppeal),
           ],
+        ],
+      ),
+    );
+  }
+
+  // ── Appeal section (shown only on sanctioned cases) ────
+  Widget _appealSection(int caseId, Map<String, dynamic>? existingAppeal) {
+    if (existingAppeal == null) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () async {
+            final submitted = await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AppealScreen(
+                  caseId: caseId,
+                  studentId: widget.studentId,
+                ),
+              ),
+            );
+            if (submitted == true) _loadCases();
+          },
+          icon: const Icon(Icons.gavel_outlined, size: 16, color: AppColors.primary),
+          label: const Text('Appeal decision', style: TextStyle(color: AppColors.primary)),
+        ),
+      );
+    }
+
+    final status = existingAppeal['status'] as String? ?? 'pending';
+    final color = status == 'approved'
+        ? Colors.green
+        : status == 'denied'
+            ? Colors.red
+            : Colors.orange;
+    final icon = status == 'approved'
+        ? Icons.check_circle
+        : status == 'denied'
+            ? Icons.cancel
+            : Icons.hourglass_empty;
+
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 6),
+        Text(
+          'Appeal: ${status[0].toUpperCase()}${status.substring(1)}',
+          style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600),
         ),
       ],
-    ),
-  );
+    );
+  }
 
   // ── Report incident button ──────────────────────────────
   Widget _reportIncidentButton(BuildContext context) => SizedBox(

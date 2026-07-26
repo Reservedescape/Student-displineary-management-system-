@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/app_colors.dart';
 import 'login_screen.dart';
+import 'appeals_review_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   final String fullName;
@@ -20,6 +21,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   List<Map<String, dynamic>> _cases = [];
   List<Map<String, dynamic>> _incidents = [];
   List<Map<String, dynamic>> _staffList = [];
+  int _pendingAppealsCount = 0;
   final Map<int, String?> _selectedStaff = {};
   final Set<int> _processingIds = {};
 
@@ -47,10 +49,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           .select()
           .eq('role', 'staff');
 
+      final pendingAppealsResult = await Supabase.instance.client
+          .from('appeals')
+          .select()
+          .eq('status', 'pending');
+
       setState(() {
         _cases = List<Map<String, dynamic>>.from(casesResult);
         _incidents = List<Map<String, dynamic>>.from(incidentsResult);
         _staffList = List<Map<String, dynamic>>.from(staffResult);
+        _pendingAppealsCount = List<Map<String, dynamic>>.from(pendingAppealsResult).length;
         _loading = false;
       });
     } catch (e) {
@@ -134,8 +142,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       Expanded(child: _statCard('Total cases', '${_cases.length}')),
                       const SizedBox(width: 12),
                       Expanded(child: _statCard('Open incidents', '${_openIncidents.length}')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _statCard('Pending appeals', '$_pendingAppealsCount')),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  _reviewAppealsButton(context),
                   const SizedBox(height: 20),
                   _sectionTitle('All open incidents'),
                   const SizedBox(height: 10),
@@ -257,6 +269,31 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       message,
       style: const TextStyle(fontSize: 13, color: Colors.grey),
       textAlign: TextAlign.center,
+    ),
+  );
+
+  // ── Review appeals button ───────────────────────────────
+  Widget _reviewAppealsButton(BuildContext context) => SizedBox(
+    width: double.infinity,
+    child: OutlinedButton.icon(
+      onPressed: () async {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const AppealsReviewScreen()),
+        );
+        _loadData();
+      },
+      icon: const Icon(Icons.rate_review_outlined, size: 18, color: AppColors.navy),
+      label: Text(
+        _pendingAppealsCount > 0
+            ? 'Review appeals ($_pendingAppealsCount pending)'
+            : 'Review appeals',
+        style: const TextStyle(color: AppColors.navy),
+      ),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        side: const BorderSide(color: AppColors.navy),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
     ),
   );
 
