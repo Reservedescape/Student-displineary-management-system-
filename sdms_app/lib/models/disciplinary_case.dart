@@ -36,7 +36,11 @@ class DisciplinaryCase {
     Hearing? hearingObj;
     if (json['hearings'] != null) {
       if (json['hearings'] is List && (json['hearings'] as List).isNotEmpty) {
-        hearingObj = Hearing.fromJson((json['hearings'] as List).first);
+        final hearingsList = (json['hearings'] as List)
+            .map((h) => Hearing.fromJson(h as Map<String, dynamic>))
+            .toList();
+        hearingsList.sort((a, b) => b.id.compareTo(a.id));
+        hearingObj = hearingsList.first;
       } else if (json['hearings'] is Map) {
         hearingObj = Hearing.fromJson(json['hearings']);
       }
@@ -45,7 +49,11 @@ class DisciplinaryCase {
     Sanction? sanctionObj;
     if (json['sanctions'] != null) {
       if (json['sanctions'] is List && (json['sanctions'] as List).isNotEmpty) {
-        sanctionObj = Sanction.fromJson((json['sanctions'] as List).first);
+        final sanctionsList = (json['sanctions'] as List)
+            .map((s) => Sanction.fromJson(s as Map<String, dynamic>))
+            .toList();
+        sanctionsList.sort((a, b) => b.id.compareTo(a.id));
+        sanctionObj = sanctionsList.first;
       } else if (json['sanctions'] is Map) {
         sanctionObj = Sanction.fromJson(json['sanctions']);
       }

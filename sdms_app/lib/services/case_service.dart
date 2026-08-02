@@ -126,18 +126,28 @@ class CaseService {
     Map<String, dynamic>? result;
 
     try {
-      result = await _client
-          .from('hearings')
-          .insert(payload)
-          .select()
-          .maybeSingle();
+      final existingList = await _client.from('hearings').select().eq('case_id', caseId) as List;
+      if (existingList.isNotEmpty) {
+        final existingId = existingList.first['id'];
+        result = await _client
+            .from('hearings')
+            .update(payload)
+            .eq('id', existingId)
+            .select()
+            .maybeSingle();
+      } else {
+        result = await _client
+            .from('hearings')
+            .insert(payload)
+            .select()
+            .maybeSingle();
+      }
     } catch (_) {
       try {
         await _client.from('hearings').insert(payload);
       } catch (_) {}
     }
 
-    // Update status on cases table if column exists
     try {
       await _client
           .from('cases')
@@ -145,19 +155,37 @@ class CaseService {
           .eq('id', caseId);
     } catch (_) {}
 
-    if (result != null) {
-      return Hearing.fromJson(result);
+    final hearingObj = result != null
+        ? Hearing.fromJson(result)
+        : Hearing(
+            id: DateTime.now().millisecondsSinceEpoch,
+            caseId: caseId,
+            studentId: studentId,
+            hearingDate: hearingDate,
+            venue: venue,
+            status: 'scheduled',
+            committeeNotes: committeeNotes,
+          );
+
+    final index = _localCases.indexWhere((c) => c.id == caseId);
+    if (index != -1) {
+      final existing = _localCases[index];
+      _localCases[index] = DisciplinaryCase(
+        id: existing.id,
+        incidentId: existing.incidentId,
+        studentId: existing.studentId,
+        assignedTo: existing.assignedTo,
+        priority: existing.priority,
+        status: CaseStatus.hearingScheduled,
+        createdAt: existing.createdAt,
+        incident: existing.incident,
+        hearing: hearingObj,
+        sanction: existing.sanction,
+        appeals: existing.appeals,
+      );
     }
 
-    return Hearing(
-      id: DateTime.now().millisecondsSinceEpoch,
-      caseId: caseId,
-      studentId: studentId,
-      hearingDate: hearingDate,
-      venue: venue,
-      status: 'scheduled',
-      committeeNotes: committeeNotes,
-    );
+    return hearingObj;
   }
 
   Future<Sanction> recordSanction({
@@ -180,11 +208,22 @@ class CaseService {
     Map<String, dynamic>? result;
 
     try {
-      result = await _client
-          .from('sanctions')
-          .insert(payload)
-          .select()
-          .maybeSingle();
+      final existingList = await _client.from('sanctions').select().eq('case_id', caseId) as List;
+      if (existingList.isNotEmpty) {
+        final existingId = existingList.first['id'];
+        result = await _client
+            .from('sanctions')
+            .update(payload)
+            .eq('id', existingId)
+            .select()
+            .maybeSingle();
+      } else {
+        result = await _client
+            .from('sanctions')
+            .insert(payload)
+            .select()
+            .maybeSingle();
+      }
     } catch (_) {
       try {
         await _client.from('sanctions').insert(payload);
@@ -198,18 +237,36 @@ class CaseService {
           .eq('id', caseId);
     } catch (_) {}
 
-    if (result != null) {
-      return Sanction.fromJson(result);
+    final sanctionObj = result != null
+        ? Sanction.fromJson(result)
+        : Sanction(
+            id: DateTime.now().millisecondsSinceEpoch,
+            caseId: caseId,
+            studentId: studentId,
+            sanctionType: sanctionType,
+            startDate: startDate,
+            endDate: endDate,
+            notes: notes,
+          );
+
+    final index = _localCases.indexWhere((c) => c.id == caseId);
+    if (index != -1) {
+      final existing = _localCases[index];
+      _localCases[index] = DisciplinaryCase(
+        id: existing.id,
+        incidentId: existing.incidentId,
+        studentId: existing.studentId,
+        assignedTo: existing.assignedTo,
+        priority: existing.priority,
+        status: CaseStatus.sanctionIssued,
+        createdAt: existing.createdAt,
+        incident: existing.incident,
+        hearing: existing.hearing,
+        sanction: sanctionObj,
+        appeals: existing.appeals,
+      );
     }
 
-    return Sanction(
-      id: DateTime.now().millisecondsSinceEpoch,
-      caseId: caseId,
-      studentId: studentId,
-      sanctionType: sanctionType,
-      startDate: startDate,
-      endDate: endDate,
-      notes: notes,
-    );
+    return sanctionObj;
   }
 }
