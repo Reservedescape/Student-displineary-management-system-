@@ -4,6 +4,7 @@ import '../core/constants.dart';
 
 class IncidentService {
   static final SupabaseClient _client = Supabase.instance.client;
+  static final List<Incident> _localIncidents = [];
 
   Future<Incident> reportIncident({
     required String reportedBy,
@@ -42,21 +43,24 @@ class IncidentService {
       } catch (_) {}
     }
 
-    if (result != null) {
-      return Incident.fromJson(result);
-    }
+    final newIncident = result != null
+        ? Incident.fromJson(result)
+        : Incident(
+            id: DateTime.now().millisecondsSinceEpoch,
+            reportedBy: finalReportedBy,
+            offenderStudentId: finalOffenderId,
+            offenderName: finalOffenderName,
+            category: category,
+            location: location.trim(),
+            description: description.trim(),
+            isAnonymous: isAnonymous,
+            createdAt: DateTime.now(),
+          );
 
-    return Incident(
-      id: DateTime.now().millisecondsSinceEpoch,
-      reportedBy: finalReportedBy,
-      offenderStudentId: finalOffenderId,
-      offenderName: finalOffenderName,
-      category: category,
-      location: location.trim(),
-      description: description.trim(),
-      isAnonymous: isAnonymous,
-      createdAt: DateTime.now(),
-    );
+    _localIncidents.removeWhere((i) => i.id == newIncident.id);
+    _localIncidents.insert(0, newIncident);
+
+    return newIncident;
   }
 
   Future<List<Incident>> fetchAllIncidents() async {
@@ -66,9 +70,21 @@ class IncidentService {
           .select()
           .order('created_at', ascending: false);
 
-      return (result as List).map((i) => Incident.fromJson(i)).toList();
+      final remoteIncidents = (result as List).map((i) => Incident.fromJson(i)).toList();
+
+      final Map<int, Incident> map = {};
+      for (var inc in _localIncidents) {
+        map[inc.id] = inc;
+      }
+      for (var inc in remoteIncidents) {
+        map[inc.id] = inc;
+      }
+
+      final merged = map.values.toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return merged;
     } catch (_) {
-      return [];
+      return List<Incident>.from(_localIncidents);
     }
   }
 }

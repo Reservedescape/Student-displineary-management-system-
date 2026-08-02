@@ -94,6 +94,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         studentId: offenderStudentId,
         assignedToStaff: staffName,
         priority: priority,
+        incident: incident,
       );
 
       if (!mounted) return;

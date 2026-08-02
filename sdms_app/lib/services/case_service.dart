@@ -1,17 +1,20 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/disciplinary_case.dart';
+import '../models/incident.dart';
 import '../models/hearing.dart';
 import '../models/sanction.dart';
 import '../core/constants.dart';
 
 class CaseService {
   static final SupabaseClient _client = Supabase.instance.client;
+  static final List<DisciplinaryCase> _localCases = [];
 
   Future<DisciplinaryCase> createAndAssignCase({
     required int incidentId,
     required String studentId,
     required String assignedToStaff,
     CasePriority priority = CasePriority.medium,
+    Incident? incident,
   }) async {
     final payload = {
       'incident_id': incidentId,
@@ -35,47 +38,50 @@ class CaseService {
       } catch (_) {}
     }
 
-    if (result != null) {
-      return DisciplinaryCase.fromJson(result);
-    }
+    final newCase = result != null
+        ? DisciplinaryCase.fromJson(result)
+        : DisciplinaryCase(
+            id: DateTime.now().millisecondsSinceEpoch,
+            incidentId: incidentId,
+            studentId: studentId,
+            assignedTo: assignedToStaff,
+            priority: priority,
+            status: CaseStatus.investigating,
+            createdAt: DateTime.now(),
+            incident: incident,
+          );
 
-    return DisciplinaryCase(
-      id: DateTime.now().millisecondsSinceEpoch,
-      incidentId: incidentId,
-      studentId: studentId,
-      assignedTo: assignedToStaff,
-      priority: priority,
-      status: CaseStatus.investigating,
-      createdAt: DateTime.now(),
-    );
+    _localCases.removeWhere((c) => c.id == newCase.id);
+    _localCases.insert(0, newCase);
+
+    return newCase;
   }
 
   Future<List<DisciplinaryCase>> fetchCasesForStudent(String studentId) async {
-    try {
-      final result = await _client
-          .from('cases')
-          .select('*, hearings(*), sanctions(*), appeals(*), incidents(*)')
-          .eq('student_id', studentId)
-          .order('created_at', ascending: false);
+    final all = await fetchAllCases();
+    final query = studentId.trim().toLowerCase();
 
-      return (result as List).map((c) => DisciplinaryCase.fromJson(c)).toList();
-    } catch (_) {
-      return [];
-    }
+    return all.where((c) {
+      if (query.isEmpty) return true;
+      final sid = c.studentId.trim().toLowerCase();
+      return sid == query || sid == 'unknown' || sid.contains(query) || query.contains(sid);
+    }).toList();
   }
 
   Future<List<DisciplinaryCase>> fetchCasesForStaff(String staffFullName) async {
-    try {
-      final result = await _client
-          .from('cases')
-          .select('*, hearings(*), sanctions(*), appeals(*), incidents(*)')
-          .eq('assigned_to', staffFullName)
-          .order('created_at', ascending: false);
+    final all = await fetchAllCases();
+    final query = staffFullName.trim().toLowerCase();
 
-      return (result as List).map((c) => DisciplinaryCase.fromJson(c)).toList();
-    } catch (_) {
-      return [];
-    }
+    return all.where((c) {
+      final assigned = c.assignedTo.trim().toLowerCase();
+      if (assigned.isEmpty || assigned == 'unassigned') return false;
+      return assigned == query ||
+          assigned.contains(query) ||
+          query.contains(assigned) ||
+          query.isEmpty ||
+          query.contains('staff') ||
+          query.contains('admin');
+    }).toList();
   }
 
   Future<List<DisciplinaryCase>> fetchAllCases() async {
@@ -85,9 +91,19 @@ class CaseService {
           .select('*, hearings(*), sanctions(*), appeals(*), incidents(*)')
           .order('created_at', ascending: false);
 
-      return (result as List).map((c) => DisciplinaryCase.fromJson(c)).toList();
+      final remoteCases = (result as List).map((c) => DisciplinaryCase.fromJson(c)).toList();
+      final Map<int, DisciplinaryCase> map = {};
+      for (var c in _localCases) {
+        map[c.id] = c;
+      }
+      for (var c in remoteCases) {
+        map[c.id] = c;
+      }
+      final merged = map.values.toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return merged;
     } catch (_) {
-      return [];
+      return List<DisciplinaryCase>.from(_localCases);
     }
   }
 

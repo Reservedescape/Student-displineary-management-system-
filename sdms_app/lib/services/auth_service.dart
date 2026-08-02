@@ -87,14 +87,33 @@ class AuthService {
   }
 
   Future<List<UserProfile>> fetchStaffList() async {
+    final defaultStaff = [
+      UserProfile(id: 'staff-1', email: 'dean@ueab.ac.ke', fullName: 'Dean of Students', role: UserRole.staff, studentId: ''),
+      UserProfile(id: 'staff-2', email: 'disciplinary@ueab.ac.ke', fullName: 'Disciplinary Committee Chair', role: UserRole.staff, studentId: ''),
+      UserProfile(id: 'staff-3', email: 'warden@ueab.ac.ke', fullName: 'Chief Hostel Warden', role: UserRole.staff, studentId: ''),
+      UserProfile(id: 'staff-4', email: 'security@ueab.ac.ke', fullName: 'Chief Security Officer', role: UserRole.staff, studentId: ''),
+      UserProfile(id: 'staff-5', email: 'staff@ueab.ac.ke', fullName: 'Staff Member', role: UserRole.staff, studentId: ''),
+    ];
+
     try {
       final result = await _client
           .from('profiles')
           .select()
           .eq('role', 'staff');
-      return (result as List).map((p) => UserProfile.fromJson(p)).toList();
-    } catch (e) {
-      return [];
+      final remoteStaff = (result as List).map((p) => UserProfile.fromJson(p)).toList();
+
+      final Map<String, UserProfile> map = {};
+      for (var s in defaultStaff) {
+        map[s.fullName.toLowerCase()] = s;
+      }
+      for (var s in remoteStaff) {
+        if (s.fullName.isNotEmpty) {
+          map[s.fullName.toLowerCase()] = s;
+        }
+      }
+      return map.values.toList();
+    } catch (_) {
+      return defaultStaff;
     }
   }
 
