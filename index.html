@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDMS - Student Disciplinary Management System</title>
+  <meta name="description" content="Digital Disciplinary Governance Platform for Universities. Streamline incident reporting, hearing scheduling, gated sanctions, and student appeals.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Remix Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-container">
+      <a href="#" class="logo-brand">
+        <div class="logo-icon">S</div>
+        <div>
+          <div class="logo-text">SDMS <span class="logo-tag">UEAB Portal</span></div>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#overview" class="nav-link">Overview</a></li>
+        <li><a href="#workflow" class="nav-link">Workflow</a></li>
+        <li><a href="#portals" class="nav-link">Portals</a></li>
+        <li><a href="#demo" class="nav-link">Live Sandbox</a></li>
+        <li><a href="#features" class="nav-link">Features</a></li>
+      </ul>
+
+      <div class="nav-cta">
+        <a href="#demo" class="btn btn-secondary"><i class="ri-play-circle-line"></i> Live Sandbox</a>
+        <a href="sdms_app/" class="btn btn-primary"><i class="ri-user-shared-line"></i> Open App Portal</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="overview">
+    <div class="hero-glow"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="badge-pill">
+          <i class="ri-shield-star-line"></i> Institutional Disciplinary Governance System
+        </div>
+        <h1 class="hero-title">
+          Fair, Transparent & Digital <br>
+          <span class="gradient-text">Disciplinary Management</span>
+        </h1>
+        <p class="hero-description">
+          A modern, cross-platform institutional solution engineered to streamline incident reporting, enforce sequential hearing-before-sanction workflow rules, and manage student appeals with complete transparency.
+        </p>
+
+        <div class="hero-actions">
+          <a href="sdms_app/" class="btn btn-primary" style="padding: 16px 36px; font-size: 16px;">
+            <i class="ri-rocket-line"></i> Launch App Portal
+          </a>
+          <a href="#demo" class="btn btn-secondary" style="padding: 16px 32px; font-size: 16px;">
+            <i class="ri-flask-line"></i> Test Workflow Logic
+          </a>
+        </div>
+
+        <!-- Live Stats Counter -->
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Workflow Gating Compliance</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">-65%</div>
+            <div class="stat-label">Case Processing Time</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">3 Roles</div>
+            <div class="stat-label">Student, Staff & Admin Isolation</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Banner -->
+      <div class="hero-visual">
+        <img src="assets/hero.jpg" alt="SDMS Dashboard Interface Preview" loading="lazy">
+        <div class="hero-overlay-badge">
+          <div class="pulse-dot"></div>
+          <div>
+            <div style="font-size: 12px; font-weight: 700; color: #F8FAFC;">Active Supabase Cloud Sync</div>
+            <div style="font-size: 11px; color: #94A3B8;">Real-Time Flutter Multi-Platform System</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflow Section -->
+  <section class="workflow-section" id="workflow">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">Enforced Process Pipeline</div>
+        <h2 class="section-title">The 4-Step Disciplinary Lifecycle</h2>
+        <p class="section-description">
+          Built-in business logic ensures zero out-of-order rulings. Sanctions are strictly locked until a disciplinary hearing has been scheduled and conducted.
+        </p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-card">
+          <div class="timeline-step">1</div>
+          <h3>Incident Reporting</h3>
+          <p>Students, witnesses, or staff report incidents with category tagging, evidence descriptions, and priority levels.</p>
+          <span class="timeline-tag">Step 1: Intake</span>
+        </div>
+
+        <div class="timeline-card">
+          <div class="timeline-step">2</div>
+          <h3>Hearing Scheduling</h3>
+          <p>Staff assign officers, set venue & date. System updates single-record hearing state without duplicate entries.</p>
+          <span class="timeline-tag">Step 2: Notice Issued</span>
+        </div>
+
+        <div class="timeline-card">
+          <div class="timeline-step">3</div>
+          <h3>Conducted Hearing & Ruling</h3>
+          <p>Sanction module unlocks on/after hearing date. Committee enters formal warnings, probation terms, or suspensions.</p>
+          <span class="timeline-tag">Step 3: Gated Sanction</span>
+        </div>
+
+        <div class="timeline-card">
+          <div class="timeline-step">4</div>
+          <h3>Student Appeal & Audit</h3>
+          <p>Students can file a 1-click appeal. Admin board reviews medical or new evidence before closing the case.</p>
+          <span class="timeline-tag">Step 4: Due Process</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Role Portals Section -->
+  <section class="portals-section" id="portals">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">Role-Based Access Control</div>
+        <h2 class="section-title">Tailored Portals for Every Stakeholder</h2>
+        <p class="section-description">
+          Each portal provides strict data isolation and dedicated tools tailored to students, disciplinary staff, and university administrators.
+        </p>
+      </div>
+
+      <div class="portal-tabs">
+        <button class="tab-btn active" data-role="student"><i class="ri-user-3-line"></i> Student Portal</button>
+        <button class="tab-btn" data-role="staff"><i class="ri-briefcase-4-line"></i> Staff & Committee</button>
+        <button class="tab-btn" data-role="admin"><i class="ri-admin-line"></i> Administrator</button>
+      </div>
+
+      <div class="portal-content">
+        <div class="portal-text">
+          <h3 id="portal-title">Student Portal: Transparency & Due Process</h3>
+          <p id="portal-desc">
+            Empowering students with clear visibility into reported incidents, scheduled committee hearings, and seamless 1-click appeal channels.
+          </p>
+
+          <ul class="portal-features-list" id="portal-features">
+            <li><i class="ri-check-line"></i> Confidential incident reporting & witness statement submission</li>
+            <li><i class="ri-check-line"></i> Real-time notifications for hearing venue, time, and committee agenda</li>
+            <li><i class="ri-check-line"></i> Direct access to ruling decisions and rehabilitation requirement steps</li>
+            <li><i class="ri-check-line"></i> Streamlined 1-click appeal submission with status tracking</li>
+          </ul>
+        </div>
+
+        <div class="portal-preview-box">
+          <div class="preview-header">
+            <div>
+              <div style="font-size: 11px; color: #94A3B8; font-weight: 700;">CASE REFERENCE</div>
+              <div style="font-size: 16px; font-weight: 800; color: #F8FAFC;" id="preview-case-id">SDMS-2026-089</div>
+            </div>
+            <span class="preview-badge scheduled" id="preview-badge">HEARING SCHEDULED</span>
+          </div>
+
+          <div style="font-size: 13px; color: #94A3B8; margin-bottom: 16px;" id="preview-status-text">
+            Scheduled for Aug 12, 2026 at Dean's Office Boardroom
+          </div>
+
+          <div id="preview-body">
+            <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+              <div style="font-size: 11px; color: #94A3B8;">ALLEGED INCIDENT</div>
+              <div style="font-size: 13px; font-weight: 600; color: #F8FAFC;">Library Noise & Disruption Policy</div>
+            </div>
+            <div style="font-size: 12px; color: #10B981; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <i class="ri-checkbox-circle-line"></i> Hearing notice dispatched to student email & portal
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Sandbox Demo -->
+  <section class="demo-section" id="demo">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">Interactive Feature Test</div>
+        <h2 class="section-title">Test the Sanction Gating Rule Live</h2>
+        <p class="section-description">
+          Adjust the hearing date below to see how SDMS automatically locks or unlocks the Sanction Module based on whether the hearing date has arrived.
+        </p>
+      </div>
+
+      <div class="sandbox-container">
+        <div class="sandbox-controls">
+          <div class="form-group">
+            <label for="demo-status">Case Status</label>
+            <select id="demo-status" class="form-control">
+              <option value="scheduled" selected>Hearing Scheduled</option>
+              <option value="no_hearing">No Hearing Scheduled Yet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="demo-date">Scheduled Hearing Date</label>
+            <input type="date" id="demo-date" class="form-control">
+          </div>
+
+          <div class="form-group">
+            <label>Today's Date</label>
+            <input type="text" class="form-control" value="2026-08-02 (Current System Time)" disabled style="background: #0B1120; opacity: 0.8;">
+          </div>
+        </div>
+
+        <div class="sandbox-result">
+          <div style="font-size: 12px; font-weight: 700; color: #94A3B8; text-transform: uppercase;">Staff Sanction Module State</div>
+          <div class="status-banner locked" id="sandbox-banner">
+            <i class="ri-lock-line" id="sandbox-icon" style="font-size: 24px;"></i>
+            <div>
+              <div style="font-size: 15px; font-weight: 700;" id="sandbox-title">Sanction Module Locked</div>
+              <div style="font-size: 13px;" id="sandbox-msg">A disciplinary hearing must be scheduled first before sanctions or rulings can be recorded.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- System Features Grid -->
+  <section class="features-grid-section" id="features" style="padding: 100px 0;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">Comprehensive Capabilities</div>
+        <h2 class="section-title">Engineered for Academic Integrity</h2>
+        <p class="section-description">
+          Every tool in SDMS is designed to ensure procedural fairness, data accuracy, and administrative efficiency.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-git-commit-line"></i></div>
+          <h3>Enforced Sequential Workflow</h3>
+          <p>Guarantees due process by locking sanctions until after the hearing date, preventing out-of-order rulings.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-database-2-line"></i></div>
+          <h3>Single-Record Persistence</h3>
+          <p>Eliminates duplicate hearing entries when rescheduling, keeping case histories clean and synchronized.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-shield-user-line"></i></div>
+          <h3>Role Isolation</h3>
+          <p>Strict access controls separate Student view, Staff committee management, and Admin appeal reviews.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-bar-chart-box-line"></i></div>
+          <h3>Institutional Analytics</h3>
+          <p>Executive dashboards track incident categories, resolution speeds, and committee workload metrics.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-file-text-line"></i></div>
+          <h3>1-Click Appeal Submissions</h3>
+          <p>Students can file formal appeal statements with evidence attachments for administrative review panels.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon"><i class="ri-cloud-line"></i></div>
+          <h3>Cloud Sync & Cross-Platform</h3>
+          <p>Built with Flutter & Supabase for seamless performance across Web, Android, iOS, and Desktop.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compliance Banner -->
+  <section class="compliance-section">
+    <div class="container">
+      <div class="section-subtitle">Institutional Security Standards</div>
+      <h2 style="font-size: 28px; margin-bottom: 12px;">Built for University Compliance & Governance</h2>
+      <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+        Fully compliant with academic due process standards, encrypted Supabase cloud storage, and institutional privacy policies.
+      </p>
+
+      <div class="compliance-logos">
+        <div class="compliance-badge"><i class="ri-lock-password-line" style="color: var(--accent-gold);"></i> 256-bit SSL Encryption</div>
+        <div class="compliance-badge"><i class="ri-verified-badge-line" style="color: var(--success);"></i> Role Authorization Guard</div>
+        <div class="compliance-badge"><i class="ri-history-line" style="color: var(--info);"></i> Complete Audit History</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <div class="logo-brand">
+            <div class="logo-icon">S</div>
+            <div class="logo-text">SDMS</div>
+          </div>
+          <p>
+            Student Disciplinary Management System — Empowering universities with fair, transparent, and digital disciplinary governance.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#workflow">Workflow</a></li>
+            <li><a href="#portals">Portals</a></li>
+            <li><a href="#demo">Live Sandbox</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>System Modules</h4>
+          <ul>
+            <li><a href="sdms_app/">Incident Reporting</a></li>
+            <li><a href="sdms_app/">Hearing Scheduler</a></li>
+            <li><a href="sdms_app/">Sanction Rulings</a></li>
+            <li><a href="sdms_app/">Appeals Review</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Institution</h4>
+          <ul>
+            <li><a href="#">UEAB Baraton</a></li>
+            <li><a href="#">Dean of Students Office</a></li>
+            <li><a href="#">Disciplinary Committee</a></li>
+            <li><a href="#">System Admin</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        &copy; 2026 Student Disciplinary Management System (SDMS). All Rights Reserved. University of Eastern Africa, Baraton.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>
