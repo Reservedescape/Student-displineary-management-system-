@@ -32,9 +32,10 @@
       <ul class="nav-links">
         <li><a href="#overview" class="nav-link">Overview</a></li>
         <li><a href="#workflow" class="nav-link">Workflow</a></li>
+        <li><a href="#guide" class="nav-link">How to Use</a></li>
         <li><a href="#portals" class="nav-link">Portals</a></li>
         <li><a href="#demo" class="nav-link">Live Sandbox</a></li>
-        <li><a href="#features" class="nav-link">Features</a></li>
+        <li><a href="#faq" class="nav-link">FAQ</a></li>
       </ul>
 
       <div class="nav-cta">
@@ -294,6 +295,109 @@
           <div class="feature-icon"><i class="ri-cloud-line"></i></div>
           <h3>Cloud Sync & Cross-Platform</h3>
           <p>Built with Flutter & Supabase for seamless performance across Web, Android, iOS, and Desktop.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- User Guide & How To Use Section -->
+  <section class="guide-section" id="guide">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">User Manual & System Guide</div>
+        <h2 class="section-title">How to Use the SDMS Platform</h2>
+        <p class="section-description">
+          Select your role below for clear, step-by-step instructions on navigating the system and managing disciplinary actions.
+        </p>
+      </div>
+
+      <div class="guide-role-selector">
+        <button class="guide-role-btn active" data-guide-role="student">
+          <i class="ri-user-3-line"></i> For Students
+        </button>
+        <button class="guide-role-btn" data-guide-role="staff">
+          <i class="ri-briefcase-4-line"></i> For Staff & Committee
+        </button>
+        <button class="guide-role-btn" data-guide-role="admin">
+          <i class="ri-admin-line"></i> For Administrators
+        </button>
+      </div>
+
+      <div class="guide-steps-grid" id="guide-grid">
+        <div class="guide-step-card">
+          <div class="guide-step-badge">1</div>
+          <h3 class="guide-step-title">Log In & View Record</h3>
+          <p class="guide-step-desc">Access your account using your Student ID. View your active disciplinary status and historical case log in real-time.</p>
+          <div class="guide-tip-box">Tip: Your status remains "Clean Record" if no active cases exist.</div>
+        </div>
+
+        <div class="guide-step-card">
+          <div class="guide-step-badge">2</div>
+          <h3 class="guide-step-title">Report Incident / Statement</h3>
+          <p class="guide-step-desc">Submit a confidential incident report or witness statement with category tags (academic dishonesty, conduct, property damage).</p>
+          <div class="guide-tip-box">Tip: Evidence description helps committee officers assess priority.</div>
+        </div>
+
+        <div class="guide-step-card">
+          <div class="guide-step-badge">3</div>
+          <h3 class="guide-step-title">Hearings & Appeal Options</h3>
+          <p class="guide-step-desc">Receive hearing date and venue details. Once ruling is issued, file a 1-click appeal with supporting evidence if eligible.</p>
+          <div class="guide-tip-box">Tip: Appeals must be submitted within the university policy timeframe.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-subtitle">Help & Documentation</div>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-description">
+          Find instant answers to common questions regarding system rules, hearing schedules, and sanction rulings.
+        </p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item active">
+          <div class="faq-question">
+            <span>Why is the Sanction Module locked until the hearing date?</span>
+            <i class="ri-arrow-down-s-line faq-toggle-icon"></i>
+          </div>
+          <div class="faq-answer">
+            SDMS enforces strict procedural due process. Disciplinary sanctions and rulings can only be issued AFTER a hearing has been scheduled and conducted. Locking the sanction module until the hearing date guarantees that students receive a fair hearing before any penalty is imposed.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How does hearing schedule persistence prevent duplicate entries?</span>
+            <i class="ri-arrow-down-s-line faq-toggle-icon"></i>
+          </div>
+          <div class="faq-answer">
+            When committee staff update or reschedule a hearing, SDMS updates the existing database record for that case rather than inserting duplicate hearing rows. Additionally, the system automatically sorts entries by latest ID to maintain single-record consistency.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>How can a student file an appeal against a ruling?</span>
+            <i class="ri-arrow-down-s-line faq-toggle-icon"></i>
+          </div>
+          <div class="faq-answer">
+            After a sanction is recorded by the committee, students can open their case card in the Student Portal and click "Submit Appeal". They can provide written grounds for appeal and attach supporting documentation for administrative board review.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">
+            <span>What happens after an administrator reviews an appeal?</span>
+            <i class="ri-arrow-down-s-line faq-toggle-icon"></i>
+          </div>
+          <div class="faq-answer">
+            Administrators can approve the appeal (overturning or modifying the sanction), deny the appeal (maintaining the ruling), or remand the case back for a rehearing. All parties receive automated real-time status updates via Supabase.
+          </div>
         </div>
       </div>
     </div>

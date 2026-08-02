@@ -162,4 +162,104 @@ document.addEventListener('DOMContentLoaded', () => {
   demoDateInput.addEventListener('change', updateSandbox);
   demoStatusSelect.addEventListener('change', updateSandbox);
   updateSandbox();
+
+  // How To Use Guide Role Switcher
+  const guideRoleBtns = document.querySelectorAll('.guide-role-btn');
+  const guideGrid = document.getElementById('guide-grid');
+
+  const guideData = {
+    student: [
+      {
+        step: '1',
+        title: 'Log In & View Record',
+        desc: 'Access your account using your Student ID. View your active disciplinary status and historical case log in real-time.',
+        tip: 'Tip: Your status remains "Clean Record" if no active cases exist.'
+      },
+      {
+        step: '2',
+        title: 'Report Incident / Statement',
+        desc: 'Submit a confidential incident report or witness statement with category tags (academic dishonesty, conduct, property damage).',
+        tip: 'Tip: Evidence description helps committee officers assess priority.'
+      },
+      {
+        step: '3',
+        title: 'Hearings & Appeal Options',
+        desc: 'Receive hearing date and venue details. Once ruling is issued, file a 1-click appeal with supporting evidence if eligible.',
+        tip: 'Tip: Appeals must be submitted within the university policy timeframe.'
+      }
+    ],
+    staff: [
+      {
+        step: '1',
+        title: 'Inspect Assigned Queue',
+        desc: 'Review cases assigned to your queue. Check student ID, incident description, category, and assigned priority.',
+        tip: 'Tip: Filter cases by priority (Urgent, High, Medium, Low).'
+      },
+      {
+        step: '2',
+        title: 'Schedule Hearing Date',
+        desc: 'Select hearing date & venue (e.g. Dean of Students Office). The system updates schedule state cleanly without duplicate rows.',
+        tip: 'Tip: Hearing schedules dispatch automated notifications.'
+      },
+      {
+        step: '3',
+        title: 'Record Gated Sanction Ruling',
+        desc: 'The Sanction Module automatically unlocks on or after the scheduled hearing date. Record formal warnings, probation, or suspension.',
+        tip: 'Tip: Sanctions are locked before the hearing date to guarantee due process.'
+      }
+    ],
+    admin: [
+      {
+        step: '1',
+        title: 'Institutional Dashboard Overview',
+        desc: 'Monitor university-wide case counts, pending hearings, active sanctions, and department resolution speeds.',
+        tip: 'Tip: Use search bar to filter by student ID or incident category.'
+      },
+      {
+        step: '2',
+        title: 'Appeals Review Panel',
+        desc: 'Inspect student appeal submissions. Review new mitigating evidence or procedural grounds before issuing final decision.',
+        tip: 'Tip: Board decisions update case status to Closed or Remanded.'
+      },
+      {
+        step: '3',
+        title: 'Staff Workload & Audit Control',
+        desc: 'Reassign cases among committee staff officers and export institutional policy compliance reports for governance.',
+        tip: 'Tip: All actions generate timestamped institutional audit logs.'
+      }
+    ]
+  };
+
+  guideRoleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      guideRoleBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const role = btn.dataset.guideRole;
+      const steps = guideData[role];
+
+      guideGrid.innerHTML = steps.map(s => `
+        <div class="guide-step-card">
+          <div class="guide-step-badge">${s.step}</div>
+          <h3 class="guide-step-title">${s.title}</h3>
+          <p class="guide-step-desc">${s.desc}</p>
+          <div class="guide-tip-box">${s.tip}</div>
+        </div>
+      `).join('');
+    });
+  });
+
+  // FAQ Accordion Toggle
+  const faqQuestions = document.querySelectorAll('.faq-question');
+  faqQuestions.forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.parentElement;
+      const isActive = item.classList.contains('active');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+      if (!isActive) {
+        item.classList.add('active');
+      }
+    });
+  });
 });
+
