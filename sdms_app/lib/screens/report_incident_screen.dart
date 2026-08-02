@@ -128,16 +128,11 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                     child: TextFormField(
                       controller: _offenderIdController,
                       decoration: const InputDecoration(
-                        labelText: 'Offender Student ID',
+                        labelText: 'Offender Student ID (Optional)',
                         hintText: 'e.g. S21/04561/19',
                         prefixIcon: Icon(Icons.badge_outlined, color: AppColors.primary),
                       ),
-                      validator: (v) {
-                        if (!_isAnonymous && (v == null || v.trim().isEmpty)) {
-                          return 'Please specify student ID';
-                        }
-                        return null;
-                      },
+                      validator: (v) => null,
                     ),
                   ),
                   const SizedBox(width: 12),

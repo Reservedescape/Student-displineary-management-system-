@@ -84,13 +84,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       return;
     }
 
-    final offenderStudentId = incident.offenderStudentId;
-    if (offenderStudentId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not determine offender Student ID from incident.')),
-      );
-      return;
-    }
+    final offenderStudentId = incident.offenderStudentId.isEmpty ? 'UNKNOWN' : incident.offenderStudentId;
 
     setState(() => _processingIds.add(incidentId));
 

@@ -477,7 +477,6 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
         icon = Icons.cancel;
         break;
       case AppealStatus.pending:
-      default:
         color = AppColors.warning;
         icon = Icons.hourglass_top;
         break;

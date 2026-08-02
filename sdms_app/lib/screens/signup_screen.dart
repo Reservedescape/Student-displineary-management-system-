@@ -65,7 +65,6 @@ class _SignupScreenState extends State<SignupScreen> {
             targetDashboard = AdminDashboardScreen(userProfile: profile);
             break;
           case UserRole.student:
-          default:
             targetDashboard = StudentDashboardScreen(userProfile: profile);
             break;
         }

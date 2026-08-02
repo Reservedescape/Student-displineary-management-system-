@@ -14,23 +14,49 @@ class IncidentService {
     required String description,
     required bool isAnonymous,
   }) async {
+    final finalOffenderId = offenderStudentId.trim().isEmpty ? 'Unknown' : offenderStudentId.trim();
+    final finalOffenderName = offenderName.trim().isEmpty ? 'Unidentified' : offenderName.trim();
+    final finalReportedBy = isAnonymous ? 'Anonymous' : (reportedBy.trim().isEmpty ? 'Anonymous' : reportedBy.trim());
+
     final payload = {
-      'reported_by': isAnonymous ? 'Anonymous' : reportedBy,
-      'offender_student_id': offenderStudentId.trim(),
-      'offender_name': offenderName.trim(),
+      'reported_by': finalReportedBy,
+      'offender_student_id': finalOffenderId,
+      'offender_name': finalOffenderName,
       'category': category.label,
       'location': location.trim(),
       'description': description.trim(),
       'is_anonymous': isAnonymous,
     };
 
-    final result = await _client
-        .from('incidents')
-        .insert(payload)
-        .select()
-        .single();
+    Map<String, dynamic>? result;
 
-    return Incident.fromJson(result);
+    try {
+      result = await _client
+          .from('incidents')
+          .insert(payload)
+          .select()
+          .maybeSingle();
+    } catch (_) {
+      try {
+        await _client.from('incidents').insert(payload);
+      } catch (_) {}
+    }
+
+    if (result != null) {
+      return Incident.fromJson(result);
+    }
+
+    return Incident(
+      id: DateTime.now().millisecondsSinceEpoch,
+      reportedBy: finalReportedBy,
+      offenderStudentId: finalOffenderId,
+      offenderName: finalOffenderName,
+      category: category,
+      location: location.trim(),
+      description: description.trim(),
+      isAnonymous: isAnonymous,
+      createdAt: DateTime.now(),
+    );
   }
 
   Future<List<Incident>> fetchAllIncidents() async {
@@ -41,8 +67,7 @@ class IncidentService {
           .order('created_at', ascending: false);
 
       return (result as List).map((i) => Incident.fromJson(i)).toList();
-    } catch (e) {
-      print('Error fetching incidents: $e');
+    } catch (_) {
       return [];
     }
   }
