@@ -928,3 +928,218 @@ h1, h2, h3, h4 {
   .features-grid { grid-template-columns: 1fr; }
   .footer-content { grid-template-columns: 1fr; }
 }
+
+/* Case Progress Bar Component Styles */
+.case-progress-wrapper {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.case-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.case-progress-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.case-progress-badge {
+  background: rgba(188, 107, 3, 0.15);
+  color: var(--accent-gold);
+  border: 1px solid rgba(188, 107, 3, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.case-progress-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.case-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-gold), #F59E0B);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.case-steps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.case-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 1;
+  flex: 1;
+}
+
+.case-step-node {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+
+.case-step-item.active .case-step-node {
+  background: var(--primary);
+  border-color: var(--accent-gold);
+  color: var(--text-main);
+  box-shadow: 0 0 10px rgba(188, 107, 3, 0.5);
+}
+
+.case-step-item.completed .case-step-node {
+  background: var(--success);
+  border-color: var(--success);
+  color: var(--text-main);
+}
+
+.case-step-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.case-step-item.active .case-step-label {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* Photo & Video Evidence Gallery & Modal */
+.evidence-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.evidence-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.evidence-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.evidence-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.evidence-chip:hover {
+  background: rgba(188, 107, 3, 0.15);
+  border-color: var(--accent-gold);
+  transform: translateY(-1px);
+}
+
+.evidence-chip.video i {
+  color: #60A5FA;
+}
+
+.evidence-chip.photo i {
+  color: var(--accent-gold);
+}
+
+/* Modal styling for evidence viewer */
+.sdms-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sdms-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sdms-modal-content {
+  background: #0F172A;
+  border: 1px solid var(--border-highlight);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: var(--shadow-glow);
+  position: relative;
+}
+
+.sdms-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-main);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.sdms-modal-close:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+

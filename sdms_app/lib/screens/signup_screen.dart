@@ -56,6 +56,13 @@ class _SignupScreenState extends State<SignupScreen> {
       if (!mounted) return;
 
       if (profile != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account created successfully! Welcome to SDMS Portal.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+
         Widget targetDashboard;
         switch (profile.role) {
           case UserRole.staff:
@@ -146,7 +153,7 @@ class _SignupScreenState extends State<SignupScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),

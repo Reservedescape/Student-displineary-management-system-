@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/appeal.dart';
+import '../models/evidence.dart';
 import '../core/constants.dart';
 
 class AppealService {
@@ -9,12 +10,14 @@ class AppealService {
     required int caseId,
     required String studentId,
     required String reason,
+    List<EvidenceItem> evidence = const [],
   }) async {
     final payload = {
       'case_id': caseId,
       'student_id': studentId,
       'reason': reason.trim(),
       'status': AppealStatus.pending.name,
+      'evidence': evidence.map((e) => e.toJson()).toList(),
     };
 
     Map<String, dynamic>? result;
@@ -49,6 +52,7 @@ class AppealService {
       reason: reason.trim(),
       status: AppealStatus.pending,
       createdAt: DateTime.now(),
+      evidence: evidence,
     );
   }
 

@@ -1,4 +1,5 @@
 import '../core/constants.dart';
+import 'evidence.dart';
 
 class Incident {
   final int id;
@@ -10,6 +11,7 @@ class Incident {
   final String description;
   final bool isAnonymous;
   final DateTime createdAt;
+  final List<EvidenceItem> evidence;
 
   Incident({
     required this.id,
@@ -21,9 +23,17 @@ class Incident {
     required this.description,
     required this.isAnonymous,
     required this.createdAt,
+    this.evidence = const [],
   });
 
   factory Incident.fromJson(Map<String, dynamic> json) {
+    List<EvidenceItem> evidenceItems = [];
+    if (json['evidence'] != null && json['evidence'] is List) {
+      evidenceItems = (json['evidence'] as List)
+          .map((e) => EvidenceItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
     return Incident(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? '0') ?? 0,
       reportedBy: json['reported_by']?.toString() ?? 'Anonymous',
@@ -34,6 +44,7 @@ class Incident {
       description: json['description']?.toString() ?? '',
       isAnonymous: json['is_anonymous'] == true || json['is_anonymous']?.toString() == 'true',
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      evidence: evidenceItems,
     );
   }
 
@@ -46,6 +57,7 @@ class Incident {
       'location': location,
       'description': description,
       'is_anonymous': isAnonymous,
+      'evidence': evidence.map((e) => e.toJson()).toList(),
     };
   }
 }

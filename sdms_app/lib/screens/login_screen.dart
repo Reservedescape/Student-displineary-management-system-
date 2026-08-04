@@ -39,10 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final email = _emailController.text.trim();
+      final emailOrId = _emailController.text.trim();
       final password = _passwordController.text;
 
-      final profile = await _authService.login(email: email, password: password);
+      final profile = await _authService.login(
+        email: emailOrId,
+        password: password,
+        selectedRole: _selectedRole,
+      );
 
       if (!mounted) return;
 
@@ -55,8 +59,8 @@ class _LoginScreenState extends State<LoginScreen> {
             userProfile: profile ??
                 UserProfile(
                   id: '0',
-                  email: email,
-                  fullName: email.split('@').first,
+                  email: emailOrId,
+                  fullName: emailOrId.split('@').first,
                   role: UserRole.staff,
                   studentId: '',
                 ),
@@ -67,8 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
             userProfile: profile ??
                 UserProfile(
                   id: '0',
-                  email: email,
-                  fullName: email.split('@').first,
+                  email: emailOrId,
+                  fullName: emailOrId.split('@').first,
                   role: UserRole.admin,
                   studentId: '',
                 ),
@@ -79,10 +83,10 @@ class _LoginScreenState extends State<LoginScreen> {
             userProfile: profile ??
                 UserProfile(
                   id: '0',
-                  email: email,
-                  fullName: email.split('@').first,
+                  email: emailOrId,
+                  fullName: emailOrId.split('@').first,
                   role: UserRole.student,
-                  studentId: '',
+                  studentId: emailOrId.contains('/') ? emailOrId : '',
                 ),
           );
           break;
@@ -162,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Image.asset(
                   'assets/logo-2.png',
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.school,
                     size: 40,
                     color: AppColors.primary,
@@ -264,13 +268,12 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               decoration: const InputDecoration(
-                labelText: 'University Email',
-                hintText: 'e.g. user@ueab.ac.ke',
+                labelText: 'University Email or Student ID',
+                hintText: 'e.g. user@ueab.ac.ke or S21/04561/19',
                 prefixIcon: Icon(Icons.mail_outline, color: AppColors.primary),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Please enter your email';
-                if (!v.contains('@')) return 'Please enter a valid email address';
+                if (v == null || v.trim().isEmpty) return 'Please enter your email or Student ID';
                 return null;
               },
             ),

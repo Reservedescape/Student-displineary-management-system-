@@ -38,29 +38,37 @@ SDMS enforces a **4-Step Sequential Lifecycle** across all cases:
 * Enter your institutional email address (e.g., `student@ueab.ac.ke`) and password.
 * Select **Student** as your role on the sign-in screen.
 
-#### 2. Viewing Your Dashboard
-* **Case Summary Card:** Displays active incidents, upcoming scheduled hearings, and current case statuses.
+#### 2. Viewing Your Dashboard & Case Progression Bar
+* **Case Progression Bar:** Every active case on your student dashboard displays a visual 4-Stage Progress Tracker:
+  * **Stage 1 (25% - Intake):** Incident report received and under officer investigation.
+  * **Stage 2 (50% - Hearing Scheduled):** Hearing date and venue assigned. Sanction module remains strictly locked until hearing date.
+  * **Stage 3 (75% - Ruling & Sanction):** Hearing completed and committee ruling recorded.
+  * **Stage 4 (100% - Resolved & Closed):** Case finalized or appeal resolved.
 * **Notifications Center:** Alerts you to any hearing notices, location updates, or committee decisions.
 
-#### 3. Submitting an Incident Report
+#### 3. Submitting an Incident Report & Photo / Video Evidence
 1. Navigate to **Report Incident** in the top navigation bar.
 2. Fill out the mandatory fields:
    * **Violation Category:** (e.g., Academic Dishonesty, Campus Noise/Disruption, Property Damage, Harassment).
    * **Date & Location of Incident.**
    * **Detailed Statement:** Provide an objective summary of the event.
-   * **Witnesses & Evidence:** (Optional) Add witness contact details or upload attachment files.
-3. Click **Submit Confidential Report**. A unique Case Reference (e.g., `SDMS-2026-089`) will be generated.
+3. **Where to Add Photos & Videos as Evidence:**
+   * Under the **Attach Evidence (Photos & Videos)** section, click **Add Photo** or **Add Video**.
+   * Upload or attach image files (`JPEG`, `PNG`, `WEBP`) or video recordings (`MP4`, `MOV`, `AVI`).
+   * Add optional caption notes or file descriptions.
+   * Preview photos and play attached video clips directly in the evidence list.
+4. Click **Submit Confidential Report**. A unique Case Reference (e.g., `SDMS-2026-089`) will be generated.
 
 #### 4. Attending Hearings & Reviewing Rulings
 * Under **My Cases**, select your case reference to view the assigned venue, committee chair, and hearing agenda.
 * Post-hearing, review the formal ruling notice, including any required rehabilitation or disciplinary terms.
 
-#### 5. Submitting an Appeal
+#### 5. Submitting an Appeal with Photo/Video Evidence
 1. Open a case marked with a ruling.
 2. Click **Submit Appeal**.
 3. Select your appeal grounds (*New Material Evidence*, *Procedural Flaw*, or *Excessive Sanction*).
-4. Provide supporting documentation (e.g., medical certificates, written statements).
-5. Click **File Appeal**. Track the status directly on your dashboard.
+4. **Attach Supporting Evidence:** Click **Add Photo** or **Add Video** under Evidence Attachments to upload new proof (medical certificates, video statements, photo receipts).
+5. Click **File Appeal to VC Board**. Track the status and appeal progress directly on your dashboard progress bar.
 
 ---
 

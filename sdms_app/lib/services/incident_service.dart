@@ -1,5 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/incident.dart';
+import '../models/evidence.dart';
 import '../core/constants.dart';
 
 class IncidentService {
@@ -14,6 +15,7 @@ class IncidentService {
     required String location,
     required String description,
     required bool isAnonymous,
+    List<EvidenceItem> evidence = const [],
   }) async {
     final finalOffenderId = offenderStudentId.trim().isEmpty ? 'Unknown' : offenderStudentId.trim();
     final finalOffenderName = offenderName.trim().isEmpty ? 'Unidentified' : offenderName.trim();
@@ -27,6 +29,7 @@ class IncidentService {
       'location': location.trim(),
       'description': description.trim(),
       'is_anonymous': isAnonymous,
+      'evidence': evidence.map((e) => e.toJson()).toList(),
     };
 
     Map<String, dynamic>? result;
@@ -55,6 +58,7 @@ class IncidentService {
             description: description.trim(),
             isAnonymous: isAnonymous,
             createdAt: DateTime.now(),
+            evidence: evidence,
           );
 
     _localIncidents.removeWhere((i) => i.id == newIncident.id);

@@ -4,12 +4,15 @@ import '../../core/formatters.dart';
 import '../../core/constants.dart';
 import '../../models/user_profile.dart';
 import '../../models/disciplinary_case.dart';
+import '../../models/evidence.dart';
 import '../../services/case_service.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/stat_card.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/priority_badge.dart';
 import '../../widgets/empty_state_widget.dart';
+import '../../widgets/case_progress_bar.dart';
+import '../../widgets/evidence_gallery_widget.dart';
 import '../login_screen.dart';
 import '../report_incident_screen.dart';
 import 'submit_appeal_screen.dart';
@@ -282,6 +285,15 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
       );
 
   Widget _buildCaseCard(DisciplinaryCase c) {
+    // Gather all attached evidence items (from incident & latest appeal)
+    final List<EvidenceItem> allEvidence = [];
+    if (c.incident?.evidence != null) {
+      allEvidence.addAll(c.incident!.evidence);
+    }
+    if (c.latestAppeal?.evidence != null) {
+      allEvidence.addAll(c.latestAppeal!.evidence);
+    }
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -350,6 +362,10 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   'Created: ${formatDate(c.createdAt)}',
                   style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
+                const SizedBox(height: 14),
+
+                // Student Case Progress Bar Widget
+                CaseProgressBar(caseItem: c),
 
                 // Hearing Notice Section
                 if (c.hearing != null) ...[
@@ -430,6 +446,13 @@ class _StudentDashboardScreenState extends State<StudentDashboardScreen> {
                   const SizedBox(height: 10),
                   _buildAppealSection(c),
                 ],
+
+                // Attached Photos & Videos Evidence Gallery
+                if (allEvidence.isNotEmpty)
+                  EvidenceGalleryWidget(
+                    evidenceItems: allEvidence,
+                    title: 'Case Evidence (Photos & Videos)',
+                  ),
               ],
             ),
           ),

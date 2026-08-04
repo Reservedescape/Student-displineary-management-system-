@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../core/app_colors.dart';
 import '../core/constants.dart';
+import '../models/evidence.dart';
 import '../services/incident_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/evidence_upload_widget.dart';
 
 class ReportIncidentScreen extends StatefulWidget {
   const ReportIncidentScreen({super.key});
@@ -23,6 +25,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
   IncidentCategory _selectedCategory = IncidentCategory.misconduct;
   bool _isAnonymous = false;
   bool _isSubmitting = false;
+  List<EvidenceItem> _evidenceList = [];
 
   @override
   void dispose() {
@@ -50,13 +53,14 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
         location: _locationController.text.trim(),
         description: _descriptionController.text.trim(),
         isAnonymous: _isAnonymous,
+        evidence: _evidenceList,
       );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Incident report submitted successfully.'),
+          content: Text('Incident report submitted successfully with evidence attachments.'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -161,7 +165,7 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                maxLines: 5,
+                maxLines: 4,
                 decoration: const InputDecoration(
                   labelText: 'Detailed Incident Description',
                   hintText: 'Describe clearly what transpired, witnesses present, and relevant facts...',
@@ -173,7 +177,15 @@ class _ReportIncidentScreenState extends State<ReportIncidentScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
+
+              // Photo & Video Evidence Upload Section
+              EvidenceUploadWidget(
+                evidenceList: _evidenceList,
+                onChanged: (newList) => setState(() => _evidenceList = newList),
+              ),
               const SizedBox(height: 16),
+
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.surface,

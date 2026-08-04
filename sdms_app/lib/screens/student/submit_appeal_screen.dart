@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import '../../models/evidence.dart';
 import '../../services/appeal_service.dart';
+import '../../widgets/evidence_upload_widget.dart';
 
 class SubmitAppealScreen extends StatefulWidget {
   final int caseId;
@@ -21,6 +23,7 @@ class _SubmitAppealScreenState extends State<SubmitAppealScreen> {
   final _reasonController = TextEditingController();
   final AppealService _appealService = AppealService();
   bool _isSubmitting = false;
+  List<EvidenceItem> _appealEvidence = [];
 
   @override
   void dispose() {
@@ -37,12 +40,13 @@ class _SubmitAppealScreenState extends State<SubmitAppealScreen> {
         caseId: widget.caseId,
         studentId: widget.studentId,
         reason: _reasonController.text.trim(),
+        evidence: _appealEvidence,
       );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Appeal submitted successfully to the Vice Chancellor Board.'),
+          content: Text('Appeal submitted successfully with supporting evidence to the Vice Chancellor Board.'),
           backgroundColor: AppColors.success,
         ),
       );
@@ -104,7 +108,7 @@ class _SubmitAppealScreenState extends State<SubmitAppealScreen> {
               const SizedBox(height: 8),
               TextFormField(
                 controller: _reasonController,
-                maxLines: 7,
+                maxLines: 5,
                 decoration: const InputDecoration(
                   hintText: 'Explain in detail why this decision should be reconsidered...',
                 ),
@@ -115,7 +119,15 @@ class _SubmitAppealScreenState extends State<SubmitAppealScreen> {
                   return null;
                 },
               ),
+              const SizedBox(height: 20),
+
+              // Photos & Videos Evidence Attachment for Appeals
+              EvidenceUploadWidget(
+                evidenceList: _appealEvidence,
+                onChanged: (newList) => setState(() => _appealEvidence = newList),
+              ),
               const SizedBox(height: 24),
+
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -128,7 +140,7 @@ class _SubmitAppealScreenState extends State<SubmitAppealScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                         )
                       : const Icon(Icons.gavel_outlined, size: 18),
-                  label: Text(_isSubmitting ? 'Submitting...' : 'Submit Appeal'),
+                  label: Text(_isSubmitting ? 'Submitting...' : 'Submit Appeal to VC Board'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.white,
